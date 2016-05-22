@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/disintegration/imaging"
+	"github.com/leocassarani/tinyrenderer/wavefront"
 )
 
 var (
@@ -19,6 +20,11 @@ var (
 	blue  = color.NRGBA{0, 0, 255, 255}
 )
 
+const (
+	width  = 800
+	height = 800
+)
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "usage: tinyrenderer [output file]")
@@ -27,16 +33,14 @@ func main() {
 
 	out := os.Args[1]
 
-	img := image.NewNRGBA(image.Rect(0, 0, 100, 100))
+	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	for x := 0; x < img.Bounds().Dx(); x++ {
 		for y := 0; y < img.Bounds().Dy(); y++ {
 			img.Set(x, y, black)
 		}
 	}
 
-	line(13, 20, 80, 40, img, white)
-	line(20, 13, 40, 80, img, red)
-	line(80, 40, 13, 20, img, red)
+	renderModel("african_head.obj", img)
 
 	// Flip vertically so the origin is in the bottom-left corner.
 	img = imaging.FlipV(img)
@@ -49,6 +53,34 @@ func main() {
 
 	if err := png.Encode(file, img); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func renderModel(filename string, img *image.NRGBA) {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	model, err := wavefront.ParseModel(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, face := range model.Faces {
+		for i := 0; i < 3; i++ {
+			v0 := model.VertexAt(face.Indices[i])
+			v1 := model.VertexAt(face.Indices[(i+1)%3])
+
+			x0 := int((v0.X + 1) * float64(width) / 2)
+			y0 := int((v0.Y + 1) * float64(height) / 2)
+
+			x1 := int((v1.X + 1) * float64(width) / 2)
+			y1 := int((v1.Y + 1) * float64(height) / 2)
+
+			line(x0, y0, x1, y1, img, white)
+		}
 	}
 }
 
