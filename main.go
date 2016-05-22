@@ -7,14 +7,16 @@ import (
 	"image/png"
 	"log"
 	"os"
+
+	"github.com/disintegration/imaging"
 )
 
 var (
-	black = color.RGBA{0, 0, 0, 255}
-	white = color.RGBA{255, 255, 255, 255}
-	red   = color.RGBA{255, 0, 0, 255}
-	green = color.RGBA{0, 255, 0, 255}
-	blue  = color.RGBA{0, 0, 255, 255}
+	black = color.NRGBA{0, 0, 0, 255}
+	white = color.NRGBA{255, 255, 255, 255}
+	red   = color.NRGBA{255, 0, 0, 255}
+	green = color.NRGBA{0, 255, 0, 255}
+	blue  = color.NRGBA{0, 0, 255, 255}
 )
 
 func main() {
@@ -25,7 +27,7 @@ func main() {
 
 	out := os.Args[1]
 
-	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	img := image.NewNRGBA(image.Rect(0, 0, 100, 100))
 	for x := 0; x < img.Bounds().Dx(); x++ {
 		for y := 0; y < img.Bounds().Dy(); y++ {
 			img.Set(x, y, black)
@@ -35,6 +37,9 @@ func main() {
 	line(13, 20, 80, 40, img, white)
 	line(20, 13, 40, 80, img, red)
 	line(80, 40, 13, 20, img, red)
+
+	// Flip vertically so the origin is in the bottom-left corner.
+	img = imaging.FlipV(img)
 
 	file, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, 0655)
 	if err != nil {
@@ -47,7 +52,7 @@ func main() {
 	}
 }
 
-func line(x0, y0, x1, y1 int, img *image.RGBA, color color.RGBA) {
+func line(x0, y0, x1, y1 int, img *image.NRGBA, color color.NRGBA) {
 	var x, y int
 	for t := 0.0; t < 1; t += 0.01 {
 		x = int(float64(x0)*(1.0-t) + float64(x1)*t)
