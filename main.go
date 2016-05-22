@@ -67,14 +67,29 @@ func line(x0, y0, x1, y1 int, img *image.NRGBA, color color.NRGBA) {
 		y0, y1 = y1, y0
 	}
 
-	for x := x0; x <= x1; x++ {
-		t := float64(x-x0) / float64(x1-x0)
-		y := int(float64(y0)*(1-t) + float64(y1)*t)
+	dx := x1 - x0
+	dy := y1 - y0
 
+	derr := abs(dy) * 2
+	err := 0
+
+	y := y0
+
+	for x := x0; x <= x1; x++ {
 		if steep {
 			img.Set(y, x, color)
 		} else {
 			img.Set(x, y, color)
+		}
+
+		err += derr
+		if err > dx {
+			if y1 > y0 {
+				y++
+			} else {
+				y--
+			}
+			err -= dx * 2
 		}
 	}
 }
