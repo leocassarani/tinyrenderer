@@ -53,9 +53,35 @@ func main() {
 }
 
 func line(x0, y0, x1, y1 int, img *image.NRGBA, color color.NRGBA) {
+	steep := abs(x0-x1) < abs(y0-y1)
+
+	// If the line is steep, swap x and y.
+	if steep {
+		x0, y0 = y0, x0
+		x1, y1 = y1, x1
+	}
+
+	if x0 > x1 {
+		// Make it left-to-right.
+		x0, x1 = x1, x0
+		y0, y1 = y1, y0
+	}
+
 	for x := x0; x <= x1; x++ {
 		t := float64(x-x0) / float64(x1-x0)
 		y := int(float64(y0)*(1-t) + float64(y1)*t)
-		img.Set(x, y, color)
+
+		if steep {
+			img.Set(y, x, color)
+		} else {
+			img.Set(x, y, color)
+		}
 	}
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
 }
