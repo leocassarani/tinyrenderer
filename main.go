@@ -53,10 +53,9 @@ func main() {
 }
 
 func line(x0, y0, x1, y1 int, img *image.NRGBA, color color.NRGBA) {
-	var x, y int
-	for t := 0.0; t < 1; t += 0.01 {
-		x = int(float64(x0)*(1.0-t) + float64(x1)*t)
-		y = int(float64(y0)*(1.0-t) + float64(y1)*t)
+	for x := x0; x <= x1; x++ {
+		t := float64(x-x0) / float64(x1-x0)
+		y := int(float64(y0)*(1-t) + float64(y1)*t)
 		img.Set(x, y, color)
 	}
 }
